@@ -1,6 +1,5 @@
 \documentclass[first=dgreen,second=purple,logo=yellowexc]{aaltoslides}
  
-%\usepackage{beamerthemesplit} 
 \usepackage{xltxtra,xunicode}
 \usepackage{fontspec}
 \usepackage{verbatim}
@@ -197,101 +196,116 @@ Roughly, The multiplicative update then pushes $y_{id}$ away from the worst fals
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
 \centering
-\begin{columns}
-\begin{column}{0.6\textwidth}
 \begin{tabular}{cc}
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/s-data-0-nerv-0_1.pdf}} & 
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/s-data-0-original-nerv-0_1.pdf}}\\
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/sphere-nerv-0_1.pdf}} &
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/sphere-original-nerv-0_1.pdf}}
-
+\subfloat[]{\includegraphics[height=0.5\textheight]{figures/s-data-0-nerv-0_1.pdf}} & 
+\subfloat[]{\includegraphics[height=0.5\textheight]{figures/s-data-0-original-nerv-0_1.pdf}}\\
 \end{tabular}
-\end{column}
-\begin{column}{0.35\textwidth}
-\caption{\footnotesize{Visualizations by multiplicative NeRV ("Multiplicative") and additive
-  NeRV ("Additive") on six data sets, emphasizing precision
-  ($\lambda=0.1$). Colors correspond to original 3D coordinates for Plain S-curve and Sphere, 
-    and to class labels of data points for other data sets.}}
-\end{column}
-\end{columns}
-\label{fig:compared_with_original1}
+\caption{Results of Plain S-curve, multiplicative vs. additive. Colors correspond to original 3D coordinates.}
 \end{figure}
 \end{frame}
+
 
 \begin{frame}{Experiments: results on different data sets}
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
 \centering
-\begin{columns}
-\begin{column}{0.6\textwidth}
 \begin{tabular}{cc}
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/lvqdata-nerv-0_1.pdf}} & 
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/lvqdata-original-nerv-0_1.pdf}}\\
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/landsat-nerv-0_1.pdf}} &
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/landsat-original-nerv-0_1.pdf}}
+\subfloat[]{\includegraphics[height=0.5\textheight]{figures/sphere-nerv-0_1.pdf}} &
+\subfloat[]{\includegraphics[height=0.5\textheight]{figures/sphere-original-nerv-0_1.pdf}}
 \end{tabular}
-\end{column}
-\begin{column}{0.35\textwidth}
-\caption{\footnotesize{Visualizations by multiplicative NeRV ("Multiplicative") and additive
-  NeRV ("Additive") on six data sets, emphasizing precision
-  ($\lambda=0.1$). Colors correspond to original 3D coordinates for Plain S-curve and Sphere, 
-    and to class labels of data points for other data sets.}}
-\end{column}
-\end{columns}
-\label{fig:compared_with_original2}
+\caption{Results of Sphere, multiplicative vs. additive. Colors correspond to original 3D coordinates.}
 \end{figure}
 \end{frame}
+
 
 \begin{frame}{Experiments: results on different data sets}
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
 \centering
-\begin{columns}
-\begin{column}{0.6\textwidth}
 \begin{tabular}{cc}
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/MNIST-500-nerv-0_1.pdf}} & 
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/MNIST-500-original-nerv-0_1.pdf}}\\
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/olivettifaces_dist-nerv-0_1.pdf}} &
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/olivettifaces_dist-original-nerv-0_1.pdf}}
+\subfloat[]{\includegraphics[height=0.5\textheight]{figures/lvqdata-nerv-0_1.pdf}} &
+\subfloat[]{\includegraphics[height=0.5\textheight]{figures/lvqdata-original-nerv-0_1.pdf}}
 \end{tabular}
-\end{column}
-\begin{column}{0.35\textwidth}
-\caption{\footnotesize{Visualizations by multiplicative NeRV ("Multiplicative") and additive
-  NeRV ("Additive") on six data sets, emphasizing precision
-  ($\lambda=0.1$). Colors correspond to original 3D coordinates for Plain S-curve and Sphere, 
-    and to class labels of data points for other data sets.}}
-\end{column}
-\end{columns}
-\label{fig:compared_with_original3}
+\caption{Results of Phoneme, multiplicative vs. additive. Colors correspond to class labels of data points.}
 \end{figure}
 \end{frame}
+
+
+\begin{frame}{Experiments: results on different data sets}
+\begin{figure}[!htb]
+\captionsetup[subfigure]{labelformat=empty}
+\centering
+\begin{tabular}{cc}
+\subfloat[]{\includegraphics[height=0.5\textheight]{figures/landsat-nerv-0_1.pdf}} &
+\subfloat[]{\includegraphics[height=0.5\textheight]{figures/landsat-original-nerv-0_1.pdf}}
+\end{tabular}
+\caption{Results of Landsat, multiplicative vs. additive. Colors correspond to class labels of data points.}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Experiments: results on different data sets}
+\begin{figure}[!htb]
+\captionsetup[subfigure]{labelformat=empty}
+\centering
+\begin{tabular}{cc}
+\subfloat[]{\includegraphics[height=0.5\textheight]{figures/MNIST-500-nerv-0_1.pdf}} &
+\subfloat[]{\includegraphics[height=0.5\textheight]{figures/MNIST-500-original-nerv-0_1.pdf}}
+\end{tabular}
+\caption{Results of MNIST, multiplicative vs. additive. Colors correspond to class labels of data points.}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Experiments: results on different data sets}
+\begin{figure}[!htb]
+\captionsetup[subfigure]{labelformat=empty}
+\centering
+\begin{tabular}{cc}
+\subfloat[]{\includegraphics[height=0.5\textheight]{figures/olivettifaces_dist-nerv-0_1.pdf}} &
+\subfloat[]{\includegraphics[height=0.5\textheight]{figures/olivettifaces_dist-original-nerv-0_1.pdf}}
+\end{tabular}
+\caption{Results of olivetti Faces, multiplicative vs. additive. Colors correspond to class labels of data points.}
+\end{figure}
+\end{frame}
+
 
 \subsection{Benchmark}
 \begin{frame}{Experiments: performance}
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
 \centering
-\begin{columns}
-\begin{column}{0.65\textwidth}
-\begin{tabular}{{@{}c@{}c@{}c@{}}}
-\subfloat[]{\includegraphics[width=0.38\textwidth]{figures/secs_cost_s-data-0.pdf}} &
-\subfloat[]{\includegraphics[width=0.38\textwidth]{figures/secs_cost_sphere.pdf}} &
-\subfloat[]{\includegraphics[width=0.38\textwidth]{figures/secs_cost_lvqdata.pdf}} \\
-\subfloat[]{\includegraphics[width=0.38\textwidth]{figures/secs_cost_landsat.pdf}} &
-\subfloat[]{\includegraphics[width=0.38\textwidth]{figures/secs_cost_MNIST-500.pdf}} &
-\subfloat[]{\includegraphics[width=0.38\textwidth]{figures/secs_cost_olivettifaces.pdf}}
+\begin{tabular}{cc}
+\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_s-data-0.pdf}} &
+\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_sphere.pdf}} 
 \end{tabular}
-\end{column}
-\begin{column}{0.25\textwidth}
-\caption{\tiny{Graphs of running time in seconds (horizontal axes) versus information
-  retrieval performance (vertical axes; lower values are better) for
-  the original additive NeRV and for our new multiplicative
-  NeRV. The multiplicative NeRV performs 300 multiplicative 
-  update iterations and the original NeRV performs 10 rounds of conjugate gradient descent, which empirically 
-  produce similar outputs.}}
-\end{column}
-\end{columns}
-\label{fig:benchmark}
+\caption{Graphs of running time vs. information retrieval performance (NeRV's cost, the lower the better). Data sets: Plain S-curve and Sphere.}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Experiments: performance}
+\begin{figure}[!htb]
+\captionsetup[subfigure]{labelformat=empty}
+\centering
+\begin{tabular}{cc}
+\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_lvqdata.pdf}} &
+\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_landsat.pdf}} 
+\end{tabular}
+\caption{Graphs of running time vs. information retrieval performance (NeRV's cost, the lower the better). Data sets: Phoneme and Landsat.}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Experiments: performance}
+\begin{figure}[!htb]
+\captionsetup[subfigure]{labelformat=empty}
+\centering
+\begin{tabular}{cc}
+\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_MNIST-500.pdf}} &
+\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_olivettifaces.pdf}} 
+\end{tabular}
+\caption{Graphs of running time vs. information retrieval performance (NeRV's cost, the lower the better). Data sets: MNIST and Olivetti Faces.}
 \end{figure}
 \end{frame}
 
@@ -301,31 +315,40 @@ Roughly, The multiplicative update then pushes $y_{id}$ away from the worst fals
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
 \centering
-\begin{columns}
-\begin{column}{0.65\textwidth}
-\begin{tabular}{{@{}c@{}c@{}c@{}}}
-\subfloat[]{\includegraphics[width=0.38\textwidth]{figures/smoothed-precision-recall-s-data-0.pdf}} &
-\subfloat[]{\includegraphics[width=0.38\textwidth]{figures/smoothed-precision-recall-s-data-06.pdf}} &
-\subfloat[]{\includegraphics[width=0.38\textwidth]{figures/smoothed-precision-recall-olivettifaces.pdf}} \\
-\subfloat[]{\includegraphics[width=0.38\textwidth]{figures/smoothed-precision-recall-hiiri.pdf}} &
-\subfloat[]{\includegraphics[width=0.38\textwidth]{figures/smoothed-precision-recall-segal-1-t.pdf}} &
-\subfloat[]{\includegraphics[width=0.38\textwidth]{figures/smoothed-precision-recall-estsp52.pdf}}
+\begin{tabular}{cc}
+\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-s-data-0.pdf}} &
+\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-s-data-06.pdf}} 
 \end{tabular}
-\end{column}
-\begin{column}{0.25\textwidth}
-\caption{\tiny{Information retrieval performance comparison. In each
-  data set (subfigure), 
-  we plot 
-  mean smoothed precision on the vertical axis and
-  mean smoothed recall on the horizontal axis for each method; best results are
-  at top right. Multiplicative NeRV (M-NeRV) and original additive
-  NeRV (NeRV) yield best results outperforming other NLDR
-  methods.}}
-\end{column}
-\end{columns}
-\label{fig:comparison}
+\caption{Mean smoothed recall vs. mean smoothed precision for different methods. Best methods locate top-right. Data sets: Plain S-curve and Noisy S-curve.}
 \end{figure}
 \end{frame}
+
+
+\begin{frame}{Experiments: comparison with other NLDR methods}
+\begin{figure}[!htb]
+\captionsetup[subfigure]{labelformat=empty}
+\centering
+\begin{tabular}{cc}
+\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-olivettifaces.pdf}} &
+\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-hiiri.pdf}} 
+\end{tabular}
+\caption{Mean smoothed recall vs. mean smoothed precision for different methods. Best methods locate top-right. Data sets: Olivetti Faces and Mouse Gene Expression.}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Experiments: comparison with other NLDR methods}
+\begin{figure}[!htb]
+\captionsetup[subfigure]{labelformat=empty}
+\centering
+\begin{tabular}{cc}
+\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-segal-1-t.pdf}} &
+\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-estsp52.pdf}} 
+\end{tabular}
+\caption{Mean smoothed recall vs. mean smoothed precision for different methods. Best methods locate top-right. Data sets: Gene Expression Compendium and Sea-water Temperature Time Series.}
+\end{figure}
+\end{frame}
+
 
 \section{Conclusion}
 \begin{frame}{Conclusion}
