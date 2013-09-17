@@ -41,27 +41,13 @@ Aalto University, School of Science and Technology}
 \section{Summary}
 \begin{frame}{Summary}
 \begin{enumerate}
-\item We propose a multiplicative update rule for the \emph{Neighbor Retrieval Visualizer} (NeRV);
+\item \emph{Neighbor Retrieval Visualizer} (NeRV) directly optimizes information retrieval measures which makes it outperform other NLDR methods;
+\item We propose a multiplicative update rule for the NeRV;
 \item It's fast and preserving good visual quality.
 \end{enumerate}
 \end{frame}
 
-\section{Background}
-%\subsection{Stochastic Neighbor embedding}
-%\begin{frame}{Stochastic Neighbor embedding (SNE)}
-%\begin{itemize}
-%\item Main idea: preserve the "soft" neighborhood relationship in the lower dimensional space as much as possible (\cite{hinton02}):
-%\begin{align*}
-%p_{ij}=&\frac{\exp(-d(x_i,x_j)^2)}{\sum_{k\ne j}\exp(-d(x_i,x_k)^2)}\\
-%q_{ij}=&\frac{\exp(-\|y_i-y_j\|^2)}{\sum_{k\ne j}\exp(-\|y_i-y_j\|^2)}\\
-%\{y^*_{ij}\}=&\argmin_{\{y_{ij}\}}\sum_i\sum_{j\ne i}p_{ij}\log\frac{p_{ij}}{q_{ij}}\\
-%=&\argmin_{\{y_{ij}\}}\sum_iKL(P_i\|Q_i)
-%\end{align*}
-%\end{itemize}
-%\end{frame}
-
-
-\subsection{Neighbor retrieval visualizer}
+\section{Neighbor retrieval visualizer}
 \begin{frame}{Neighbor retrieval visualizer (NeRV)}
 NeRV minimizes two categories of errors: \emph{false neighbors} and \emph{misses}, and establishes connections between the errors and KL-divergences (\cite{venna10jmlr})
 \begin{align*}
@@ -93,8 +79,7 @@ NeRV minimizes two categories of errors: \emph{false neighbors} and \emph{misses
 \end{figure}
 \end{frame}
 
-\section{Our method}
-\subsection{Motivation}
+\section{How to make it fast}
 \begin{frame}{To speed up NeRV}
 \begin{itemize}
 \item The original gradient descent based optimization is too slow for some cases, particular when involving user interaction (\cite{peltonen13eurovis})
@@ -108,7 +93,7 @@ Instead of the usual additive update rule
 \[
 z^{(t+1)}_{id}=z^{(t)}_{id}-\alpha_{id} \nabla_{id} \mathcal{J}(z^{(t)})\;,
 \]
-we use the \emph{multiplicative} update rule (\cite{yang10mlsp})
+we derive the \emph{multiplicative} update rule which is similar to (\cite{yang10mlsp}):
 \[
 z^{(t+1)}_{id}=z^{(t)}_{id}\frac{\nabla^-_{id} \mathcal{J}(z^{(t)})}{\nabla^+_{id} \mathcal{J}(z^{(t)})}\;,
 \]
@@ -134,13 +119,13 @@ z^{(t+1)}_{id} =& z^{(t)}_{id}-\alpha_{id} \nabla_{id} \mathcal{J}(z^{(t)})\\
 \right\}\Longrightarrow z^{(t+1)}_{id}=z^{(t)}_{id}\frac{\nabla^-_{id} \mathcal{J}(z^{(t)})}{\nabla^+_{id} \mathcal{J}(z^{(t)})}
 \]
 \end{enumerate}
-Benefit: no need to tune the step parameter $\alpha_{id}$, without changing the "stationary condition".
+Benefit: no need to tune the learning rate $\alpha_{id}$, without changing the "stationary condition".
 \end{frame}
 
-\subsection{Technical detail}
+
 \begin{frame}{Multiplicative NeRV in detail}
 \begin{enumerate}
-\item Transform the coordinate $y_{id}$ into $z_{id}=\exp(y_{id})$ to preserve the sign
+\item Re-parameterize using $z_{id}=\exp(y_{id})$ to preserve the sign;
 \item Introduce the notations below
 \begin{align*}
 KL_{ij}=&\frac{1-\lambda}{\sigma_i^2}q_{j|i}D_{KL}(q_i,p_i)\;,\;\;kl_{ij}=\frac{1-\lambda}{\sigma_i^2}q_{j|i}\log\frac{q_{j|i}}{p_{j|i}}\\
@@ -149,16 +134,16 @@ P_{ij}=&\frac{\lambda p_{j|i}}{\sigma_i^2}\;,\;\;Q_{ij}=\frac{\lambda q_{j|i}}{\
 \end{enumerate}
 Interpretations:
 \begin{itemize}
-\item \footnotesize{$(KL_{ij}-kl_{ij})$ is positive if neighbor $j$ contributed a greater proportion of the total false
-neighbor cost for query point $i$ than a proportion based only on the output probability $q_{j|i}$,
-weighted by cost of false neighbors and neighborhood size.}
+\item 
+$KL_{ij}-kl_{ij}>0 \Longrightarrow q_{j|i}D_{KL}(q_i,p_i)>q_{j|i}\log\frac{q_{j|i}}{p_{j|i}}$, which means for query point $i$, neighbor $j$ contributed greater to the total false neighbor cost.
+
 \end{itemize}
 \end{frame}
 
 
 \begin{frame}{Multiplicative NeRV in detail}
 \begin{enumerate}
-\item Transform the coordinate $y_{id}$ into $z_{id}=\exp(y_{id})$ to preserve the sign
+\item Re-parameterize using $z_{id}=\exp(y_{id})$ to preserve the sign
 \item Introduce the notations below
 \begin{align*}
 KL_{ij}=&\frac{1-\lambda}{\sigma_i^2}q_{j|i}D_{KL}(q_i,p_i)\;,\;\;kl_{ij}=\frac{1-\lambda}{\sigma_i^2}q_{j|i}\log\frac{q_{j|i}}{p_{j|i}}\\
@@ -168,9 +153,8 @@ P_{ij}=&\frac{\lambda p_{j|i}}{\sigma_i^2}\;,\;\;Q_{ij}=\frac{\lambda q_{j|i}}{\
 
 Interpretations:
 \begin{itemize}
-\item \footnotesize{$(P_{ij}-Q_{ij})$ is positive if neighbor $j$ is missed for point $i$, weighted by the cost of misses and the neighborhood size.
+\item $P_{ij}-Q_{ij}>0 \Longrightarrow p_{j|i}>q_{j|i}$, which means neighbor $j$ is missed for point $i$.
 
-}
 \end{itemize}
 \end{frame}
 
@@ -191,7 +175,6 @@ Roughly, The multiplicative update then pushes $y_{id}$ away from the worst fals
 \end{frame}
 
 \section{Experiments}
-\subsection{Results on different data sets}
 \begin{frame}{Experiments: results on different data sets}
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
@@ -270,7 +253,6 @@ Roughly, The multiplicative update then pushes $y_{id}$ away from the worst fals
 \end{frame}
 
 
-\subsection{Benchmark}
 \begin{frame}{Experiments: performance}
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
@@ -310,7 +292,6 @@ Roughly, The multiplicative update then pushes $y_{id}$ away from the worst fals
 \end{frame}
 
 
-\subsection{Comparison with other NLDR methods}
 \begin{frame}{Experiments: comparison with other NLDR methods}
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
@@ -350,8 +331,11 @@ Roughly, The multiplicative update then pushes $y_{id}$ away from the worst fals
 \end{frame}
 
 
-\section{Conclusion}
 \begin{frame}{Conclusion}
-We introduced a multiplicative update rule for the information retrieval based visualization method Neighbor Retrieval Visualizer (NeRV). It needs no user-assigned learning rate parameter or line search; in experiments it yields strong speedup over original NeRV and maintains state of the art performance, in terms of qualitative appearance of visualizations and quantitative information retrieval performance measures.
+\begin{enumerate}
+\item We introduced a multiplicative update rule for the information retrieval based visualization method Neighbor Retrieval Visualizer (NeRV);
+\item It needs no user-assigned learning rate parameter or line search;
+\item It yields strong speedup over original NeRV and maintains state of the art performance, in terms of qualitative appearance of visualizations and quantitative information retrieval performance measures.
+\end{enumerate}
 \end{frame}
 \end{document}
