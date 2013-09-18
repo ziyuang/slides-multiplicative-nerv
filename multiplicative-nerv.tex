@@ -54,6 +54,11 @@ NeRV minimizes two categories of errors: \emph{false neighbors} and \emph{misses
 \{y^*_{ij}\}=&\argmin_{\{y_{ij}\}}\sum_i\sum_{j\ne i}\lambda p_{ij}\log\frac{p_{ij}}{q_{ij}}+(1-\lambda)q_{ij}\log\frac{q_{ij}}{p_{ij}}\\
 =&\argmin_{\{y_{ij}\}}\sum_i\lambda KL(P_i\|Q_i)+(1-\lambda)KL(Q_i\|P_i)
 \end{align*}
+where
+\begin{align*}
+KL(P_i\|Q_i)\propto & \mbox{ misses}\\
+KL(Q_i\|P_i)\propto & \mbox{ false neighbors}
+\end{align*}
 \end{frame}
 
 
