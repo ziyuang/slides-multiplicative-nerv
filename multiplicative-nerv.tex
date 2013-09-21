@@ -78,42 +78,56 @@ KL(Q_i\|P_i)\propto & \mbox{ false neighbors}
 \includegraphics[width=\textwidth]{figures/demo.png}
 \end{column}
 \begin{column}{0.3\textwidth}
-\caption{\scriptsize{Results of NeRV for a toy data set. \textbf{A} minimizes false neighbors (or emphasizes \emph{precision}) while \textbf{B} minimized misses (or emphasizes \emph{recall}). Top right shows the mean precision-mean recall curves as a function of the output neighborhood size $k$.}}
+\caption{\scriptsize{Results of NeRV for a toy data set. \textbf{A} minimizes false neighbors (or emphasizes \emph{precision}) while \textbf{B} minimizes misses (or emphasizes \emph{recall}). Top right shows the mean precision-mean recall curves as a function of the output neighborhood size $k$.}}
 \end{column}
 \end{columns}
 \end{figure}
 \end{frame}
 
 \section{How to make it fast}
-\begin{frame}{To speed up NeRV}
-\begin{itemize}
-\item The original gradient descent based optimization is too slow for some cases, particular when involving user interaction (\cite{peltonen13eurovis})
-\item Quad-tree based acceleration: \cite{yang13icml}, \cite{vandermaaten13iclr}
-\item Problems: have to assume the neighborhood distribution $p_{ij}$ to be sparse
-\end{itemize}
-\end{frame}
+\begin{frame}{NeRV is slow}
 
-\begin{frame}{Our method}
-Instead of the usual additive update rule
+NeRV is based on the traditional gradient descent method, which uses the additive update rule that needs a line search for the learning parameter $\alpha$:
 \[
 z^{(t+1)}_{id}=z^{(t)}_{id}-\alpha_{id} \nabla_{id} \mathcal{J}(z^{(t)})\;,
-\]
-we derive the \emph{multiplicative} update rule which is similar to (\cite{yang10mlsp}):
-\[
-z^{(t+1)}_{id}=z^{(t)}_{id}\frac{\nabla^-_{id} \mathcal{J}(z^{(t)})}{\nabla^+_{id} \mathcal{J}(z^{(t)})}\;,
 \]
 where
 \begin{align*}
 z^{(t)}_{id}:&\mbox{ the $(i,d)$-th parameter at the $t$-th iteration;}\\
 \mathcal{J}:&\mbox{ the cost function;}\\
-\nabla_{id}:&\mbox{ the $(i,d)$-th component of the gradient;}\\
-\nabla_{id}^+,\nabla_{id}^-:&\mbox{ satisfy }\nabla_{id}\mathcal{J}=\nabla_{id}^+\mathcal{J}-\nabla_{id}^-\mathcal{J}\mbox{ and }\nabla_{id}^+\mathcal{J},\nabla_{id}^-\mathcal{J}\ge 0
+\nabla_{id}:&\mbox{ the $(i,d)$-th component of the gradient;}
+\end{align*}
+\end{frame}
+
+\begin{frame}{NeRV is slow}
+\begin{itemize}
+\item Because of the line search, it is too slow particularly when involving user interaction (\cite{peltonen13eurovis});
+\item Quad-tree based accelerations are considered, but they have to assume the neighborhood distribution $p_{ij}$ to be sparse (\cite{yang13icml} or \cite{vandermaaten13iclr}).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Our method}
+To exempt the tuning or line search in the additive update, we derive the \emph{multiplicative} update rule which is similar to (\cite{yang10mlsp}):
+\[
+z^{(t+1)}_{id}=z^{(t)}_{id}\frac{\nabla^-_{id} \mathcal{J}(z^{(t)})}{\nabla^+_{id} \mathcal{J}(z^{(t)})}\;,
+\]
+where $\nabla_{id}^+$ and $\nabla_{id}^-$ is a decomposition of the gradient that satisfies
+\begin{align*}
+\nabla_{id}\mathcal{J} =& \nabla_{id}^+\mathcal{J}-\nabla_{id}^-\mathcal{J}\\
+\nabla_{id}^+\mathcal{J} \ge& 0\\
+\nabla_{id}^-\mathcal{J} \ge& 0
 \end{align*}
 \end{frame}
 
 \begin{frame}{Connections with additive update}
 \begin{enumerate}
-\item $\nabla_{id}\mathcal{J}(z_{id})=0 \Longrightarrow \nabla_{id}^+\mathcal{J}(z_{id})=\nabla_{id}^-\mathcal{J}(z_{id})$;
+\item They have the same extreme points:
+\begin{align*}
+& z_{id}^{(t+1)}=z_{id}^{(t)} \mbox{ (in additive update)}\\
+\Longrightarrow& \nabla_{id}\mathcal{J}(z_{id})=0\\
+\Longrightarrow& \nabla_{id}^+\mathcal{J}(z_{id})=\nabla_{id}^-\mathcal{J}(z_{id})\\
+\Longrightarrow& z_{id}^{(t+1)}=z_{id}^{(t)}\mbox{ (in multiplicative update)}
+\end{align*}
 \item
 \[
 \left.
@@ -124,149 +138,111 @@ z^{(t+1)}_{id} =& z^{(t)}_{id}-\alpha_{id} \nabla_{id} \mathcal{J}(z^{(t)})\\
 \right\}\Longrightarrow z^{(t+1)}_{id}=z^{(t)}_{id}\frac{\nabla^-_{id} \mathcal{J}(z^{(t)})}{\nabla^+_{id} \mathcal{J}(z^{(t)})}
 \]
 \end{enumerate}
-Benefit: no need to tune the learning rate $\alpha_{id}$, without changing the "stationary condition".
 \end{frame}
 
 
-\begin{frame}{Multiplicative NeRV in detail}
+\begin{frame}{The pipeline of multiplicative NeRV}
 \begin{enumerate}
-\item Re-parameterize using $z_{id}=\exp(y_{id})$ to preserve the sign;
-\item Introduce the notations below
-\begin{align*}
-KL_{ij}=&\frac{1-\lambda}{\sigma_i^2}q_{j|i}D_{KL}(q_i,p_i)\;,\;\;kl_{ij}=\frac{1-\lambda}{\sigma_i^2}q_{j|i}\log\frac{q_{j|i}}{p_{j|i}}\\
-P_{ij}=&\frac{\lambda p_{j|i}}{\sigma_i^2}\;,\;\;Q_{ij}=\frac{\lambda q_{j|i}}{\sigma_i^2} \;.
-\end{align*}
-\end{enumerate}
-Interpretations:
-\begin{itemize}
-\item 
-$KL_{ij}-kl_{ij}>0 \Longrightarrow q_{j|i}D_{KL}(q_i,p_i)>q_{j|i}\log\frac{q_{j|i}}{p_{j|i}}$, which means for query point $i$, neighbor $j$ contributed greater to the total false neighbor cost.
-
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}{Multiplicative NeRV in detail}
-\begin{enumerate}
-\item Re-parameterize using $z_{id}=\exp(y_{id})$ to preserve the sign
-\item Introduce the notations below
-\begin{align*}
-KL_{ij}=&\frac{1-\lambda}{\sigma_i^2}q_{j|i}D_{KL}(q_i,p_i)\;,\;\;kl_{ij}=\frac{1-\lambda}{\sigma_i^2}q_{j|i}\log\frac{q_{j|i}}{p_{j|i}}\\
-P_{ij}=&\frac{\lambda p_{j|i}}{\sigma_i^2}\;,\;\;Q_{ij}=\frac{\lambda q_{j|i}}{\sigma_i^2} \;.
-\end{align*}
-\end{enumerate}
-
-Interpretations:
-\begin{itemize}
-\item $P_{ij}-Q_{ij}>0 \Longrightarrow p_{j|i}>q_{j|i}$, which means neighbor $j$ is missed for point $i$.
-
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}{Multiplicative NeRV in detail}
-We calculated the update as
+\item Re-parameterization with $z_{id}^{(0)}=\exp(y_{id}^{(0)})$ where $y_{id}$ are the coordinates in the display, because multiplicative update preserves the sign of the parameters;
+\item Update multiplicatively
 \[
-z_{id}^{(t+1)}=z_{id}^{(t)} \frac{\sum_{j\ne i}A_{ij}^+Y^{d-}_{ij}+A_{ij}^-Y^{d+}_{ij}}{\sum_{j\ne i}A_{ij}^+Y^{d+}_{ij}+A^-_{ij}Y^{d-}_{ij}}
+z^{(t+1)}_{id}=z^{(t)}_{id}\frac{\nabla^-_{id} \mathcal{J}(z^{(t)})}{\nabla^+_{id} \mathcal{J}(z^{(t)})}
 \]
-where
-\begin{align*}
-A_{ij}^+=&(KL_{ij}-kl_{ij})^++(P_{ij}-Q_{ij})^+ +(KL_{ji}-kl_{ji})^++(P_{ji}-Q_{ji})^+ \;,\\
-A_{ij}^-=&(KL_{ij}-kl_{ij})^-+(P_{ij}-Q_{ij})^- +(KL_{ji}-kl_{ji})^-+(P_{ji}-Q_{ji})^- \;,\\
-Y^{d+}_{ij}=&\left(y_{id}^++y_{jd}^-\right)\;,\;\;\;
-Y^{d-}_{ij}=\left(y_{id}^-+y_{jd}^+\right)
-\end{align*}
-Roughly, The multiplicative update then pushes $y_{id}$ away from the worst false neighbors of $i$ and towards missed neighbors.
+for 300 iterations empirically;
+\item Transform back to the display space:
+\[
+y_{id}^* =\log z^{*}_{id}
+\]
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Information retrieval perspective interpretation}
+\begin{itemize}
+\item Summary: the multiplicative update roughly pushes $y_{id}$ away from the worst false neighbors of $i$ and towards missed neighbors.
+\item As a very brief explanation, the final update involves terms like $(q_{j|i}D_{KL}(q_i,p_i)-q_{j|i}\log\frac{q_{j|i}}{p_{j|i}})$ and $(p_{j|i}-q_{j|i})$, from which we can see
+\begin{enumerate}
+\item $q_{j|i}D_{KL}(q_i,p_i)>q_{j|i}\log\frac{q_{j|i}}{p_{j|i}}$ means for query point $i$, neighbor $j$ contributed greater to the total false neighbor cost.
+\item $p_{j|i}>q_{j|i}$ means neighbor $j$ is missed for point $i$.
+\end{enumerate}
+\item More details are available in the paper.
+\end{itemize}
 \end{frame}
 
 \section{Experiments}
-\begin{frame}{Experiments: results on different data sets}
+\begin{frame}{Experiments: results on Plain S-curve}
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
 \centering
 \begin{tabular}{cc}
-\subfloat[]{\includegraphics[height=0.5\textheight]{figures/s-data-0-nerv-0_1.pdf}} & 
-\subfloat[]{\includegraphics[height=0.5\textheight]{figures/s-data-0-original-nerv-0_1.pdf}}\\
+\subfloat[Multiplicative]{\includegraphics[height=0.5\textheight]{figures/s-data-0-nerv-0_1.pdf}} & 
+\subfloat[Additive]{\includegraphics[height=0.5\textheight]{figures/s-data-0-original-nerv-0_1.pdf}}\\
 \end{tabular}
-\caption{Results of Plain S-curve, multiplicative vs. additive. Colors correspond to original 3D coordinates.}
+\caption{Colors correspond to original 3D coordinates.}
 \end{figure}
 \end{frame}
 
 
-\begin{frame}{Experiments: results on different data sets}
+\begin{frame}{Experiments: results on Sphere}
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
 \centering
 \begin{tabular}{cc}
-\subfloat[]{\includegraphics[height=0.5\textheight]{figures/sphere-nerv-0_1.pdf}} &
-\subfloat[]{\includegraphics[height=0.5\textheight]{figures/sphere-original-nerv-0_1.pdf}}
+\subfloat[Multiplicative]{\includegraphics[height=0.5\textheight]{figures/sphere-nerv-0_1.pdf}} &
+\subfloat[Additive]{\includegraphics[height=0.5\textheight]{figures/sphere-original-nerv-0_1.pdf}}
 \end{tabular}
-\caption{Results of Sphere, multiplicative vs. additive. Colors correspond to original 3D coordinates.}
+\caption{Colors correspond to original 3D coordinates.}
 \end{figure}
 \end{frame}
 
 
-\begin{frame}{Experiments: results on different data sets}
+\begin{frame}{Experiments: results on Phoneme}
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
 \centering
 \begin{tabular}{cc}
-\subfloat[]{\includegraphics[height=0.5\textheight]{figures/lvqdata-nerv-0_1.pdf}} &
-\subfloat[]{\includegraphics[height=0.5\textheight]{figures/lvqdata-original-nerv-0_1.pdf}}
+\subfloat[Multiplicative]{\includegraphics[height=0.5\textheight]{figures/lvqdata-nerv-0_1.pdf}} &
+\subfloat[Additive]{\includegraphics[height=0.5\textheight]{figures/lvqdata-original-nerv-0_1.pdf}}
 \end{tabular}
-\caption{Results of Phoneme, multiplicative vs. additive. Colors correspond to class labels of data points.}
+\caption{A data set of phonemes (a basic unit of a language's phonology). Colors correspond to different phonemes.}
 \end{figure}
 \end{frame}
 
 
-\begin{frame}{Experiments: results on different data sets}
+\begin{frame}{Experiments: results on Landsat}
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
 \centering
 \begin{tabular}{cc}
-\subfloat[]{\includegraphics[height=0.5\textheight]{figures/landsat-nerv-0_1.pdf}} &
-\subfloat[]{\includegraphics[height=0.5\textheight]{figures/landsat-original-nerv-0_1.pdf}}
+\subfloat[Multiplicative]{\includegraphics[height=0.5\textheight]{figures/landsat-nerv-0_1.pdf}} &
+\subfloat[Additive]{\includegraphics[height=0.5\textheight]{figures/landsat-original-nerv-0_1.pdf}}
 \end{tabular}
-\caption{Results of Landsat, multiplicative vs. additive. Colors correspond to class labels of data points.}
+\caption{A data set of images of land taken by satellite. Colors correspond to terrain types.}
 \end{figure}
 \end{frame}
 
 
-\begin{frame}{Experiments: results on different data sets}
+\begin{frame}{Experiments: results on MNIST}
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
 \centering
 \begin{tabular}{cc}
-\subfloat[]{\includegraphics[height=0.5\textheight]{figures/MNIST-500-nerv-0_1.pdf}} &
-\subfloat[]{\includegraphics[height=0.5\textheight]{figures/MNIST-500-original-nerv-0_1.pdf}}
+\subfloat[Multiplicative]{\includegraphics[height=0.5\textheight]{figures/MNIST-500-nerv-0_1.pdf}} &
+\subfloat[Additive]{\includegraphics[height=0.5\textheight]{figures/MNIST-500-original-nerv-0_1.pdf}}
 \end{tabular}
-\caption{Results of MNIST, multiplicative vs. additive. Colors correspond to class labels of data points.}
+\caption{A data set for hand-written digits. Colors correspond to different digits.}
 \end{figure}
 \end{frame}
 
 
-\begin{frame}{Experiments: results on different data sets}
+\begin{frame}{Experiments: results on Olivetti Faces}
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
 \centering
 \begin{tabular}{cc}
-\subfloat[]{\includegraphics[height=0.5\textheight]{figures/olivettifaces_dist-nerv-0_1.pdf}} &
-\subfloat[]{\includegraphics[height=0.5\textheight]{figures/olivettifaces_dist-original-nerv-0_1.pdf}}
+\subfloat[Multiplicative]{\includegraphics[height=0.5\textheight]{figures/olivettifaces_dist-nerv-0_1.pdf}} &
+\subfloat[Additive]{\includegraphics[height=0.5\textheight]{figures/olivettifaces_dist-original-nerv-0_1.pdf}}
 \end{tabular}
-\caption{Results of olivetti Faces, multiplicative vs. additive. Colors correspond to class labels of data points.}
-\end{figure}
-\end{frame}
-
-
-\begin{frame}{Experiments: performance}
-\begin{figure}[!htb]
-\captionsetup[subfigure]{labelformat=empty}
-\centering
-\begin{tabular}{cc}
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_s-data-0.pdf}} &
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_sphere.pdf}} 
-\end{tabular}
-\caption{Graphs of running time vs. information retrieval performance (NeRV's cost, the lower the better). Data sets: Plain S-curve and Sphere.}
+\caption{A data set of faces. Colors correspond to different people.}
 \end{figure}
 \end{frame}
 
@@ -276,10 +252,10 @@ Roughly, The multiplicative update then pushes $y_{id}$ away from the worst fals
 \captionsetup[subfigure]{labelformat=empty}
 \centering
 \begin{tabular}{cc}
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_lvqdata.pdf}} &
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_landsat.pdf}} 
+\subfloat[Plain S-curve]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_s-data-0.pdf}} &
+\subfloat[Sphere]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_sphere.pdf}} 
 \end{tabular}
-\caption{Graphs of running time vs. information retrieval performance (NeRV's cost, the lower the better). Data sets: Phoneme and Landsat.}
+\caption{Graphs of running time vs. information retrieval performance (NeRV's cost, the lower the better).}
 \end{figure}
 \end{frame}
 
@@ -289,10 +265,23 @@ Roughly, The multiplicative update then pushes $y_{id}$ away from the worst fals
 \captionsetup[subfigure]{labelformat=empty}
 \centering
 \begin{tabular}{cc}
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_MNIST-500.pdf}} &
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_olivettifaces.pdf}} 
+\subfloat[Phoneme]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_lvqdata.pdf}} &
+\subfloat[Landsat]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_landsat.pdf}} 
 \end{tabular}
-\caption{Graphs of running time vs. information retrieval performance (NeRV's cost, the lower the better). Data sets: MNIST and Olivetti Faces.}
+\caption{Graphs of running time vs. information retrieval performance (NeRV's cost, the lower the better).}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Experiments: performance}
+\begin{figure}[!htb]
+\captionsetup[subfigure]{labelformat=empty}
+\centering
+\begin{tabular}{cc}
+\subfloat[MNIST]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_MNIST-500.pdf}} &
+\subfloat[Olivetti Faces]{\includegraphics[width=0.5\textwidth]{figures/secs_cost_olivettifaces.pdf}} 
+\end{tabular}
+\caption{Graphs of running time vs. information retrieval performance (NeRV's cost, the lower the better).}
 \end{figure}
 \end{frame}
 
@@ -302,10 +291,10 @@ Roughly, The multiplicative update then pushes $y_{id}$ away from the worst fals
 \captionsetup[subfigure]{labelformat=empty}
 \centering
 \begin{tabular}{cc}
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-s-data-0.pdf}} &
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-s-data-06.pdf}} 
+\subfloat[Plain S-curve]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-s-data-0.pdf}} &
+\subfloat[Noisy S-curve]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-s-data-06.pdf}} 
 \end{tabular}
-\caption{Mean smoothed recall vs. mean smoothed precision for different methods. Best methods locate top-right. Data sets: Plain S-curve and Noisy S-curve.}
+\caption{Mean smoothed recall vs. mean smoothed precision for different methods. Best methods locate top-right.}
 \end{figure}
 \end{frame}
 
@@ -315,10 +304,10 @@ Roughly, The multiplicative update then pushes $y_{id}$ away from the worst fals
 \captionsetup[subfigure]{labelformat=empty}
 \centering
 \begin{tabular}{cc}
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-olivettifaces.pdf}} &
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-hiiri.pdf}} 
+\subfloat[Olivetti Faces]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-olivettifaces.pdf}} &
+\subfloat[Mouse Gene Expression]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-hiiri.pdf}} 
 \end{tabular}
-\caption{Mean smoothed recall vs. mean smoothed precision for different methods. Best methods locate top-right. Data sets: Olivetti Faces and Mouse Gene Expression.}
+\caption{Mean smoothed recall vs. mean smoothed precision for different methods. Best methods locate top-right. Mouse Gene Expression data set: gene expression profiles from different mouse tissues.}
 \end{figure}
 \end{frame}
 
@@ -328,10 +317,10 @@ Roughly, The multiplicative update then pushes $y_{id}$ away from the worst fals
 \captionsetup[subfigure]{labelformat=empty}
 \centering
 \begin{tabular}{cc}
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-segal-1-t.pdf}} &
-\subfloat[]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-estsp52.pdf}} 
+\subfloat[Gene Expression Compendium]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-segal-1-t.pdf}} &
+\subfloat[Sea-water Temperature Time Series]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-estsp52.pdf}} 
 \end{tabular}
-\caption{Mean smoothed recall vs. mean smoothed precision for different methods. Best methods locate top-right. Data sets: Gene Expression Compendium and Sea-water Temperature Time Series.}
+\caption{Gene Expression Compendium data set: human gene expression arrays; Sea-water Temperature Time Teries data set: a time series of weekly temperature measurements of sea water over years.}
 \end{figure}
 \end{frame}
 
