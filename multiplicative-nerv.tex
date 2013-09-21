@@ -28,9 +28,6 @@ Aalto University, School of Science and Technology}
 \DeclareMathOperator*{\argmax}{arg\,max\,}
 
 \begin{document}
-%\begin{frame}
-%  \titlepage
-%\end{frame}
 
 \aaltotitleframe
 
@@ -55,10 +52,15 @@ NeRV minimizes two categories of errors: \emph{false neighbors} and \emph{misses
 =&\argmin_{\{y_{ij}\}}\sum_i\lambda KL(P_i\|Q_i)+(1-\lambda)KL(Q_i\|P_i)
 \end{align*}
 where
-\begin{align*}
-KL(P_i\|Q_i)\propto & \mbox{ misses}\\
-KL(Q_i\|P_i)\propto & \mbox{ false neighbors}
-\end{align*}
+\[
+p_{ij} = \frac{\exp(-d(x_i,x_j)^2/(2\sigma^2_i))}{\sum_{k\ne i} \exp(-d(x_i,x_k)^2)/(2\sigma^2_i)},\;
+q_{ij} = \frac{\exp(-\|y_i-y_j\|^2/(2\sigma^2_i))}{\sum_{k\ne i} \exp(-\|y_i-y_k\|^2)/(2\sigma^2_i)}
+\]
+
+\[
+KL(P_i\|Q_i)\propto \mbox{ misses},\;KL(Q_i\|P_i)\propto \mbox{ false neighbors}
+\]
+
 \end{frame}
 
 
