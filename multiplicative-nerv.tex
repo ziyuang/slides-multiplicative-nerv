@@ -19,10 +19,10 @@
 %\usepackage[T1]{fontenc}
 
 
-\title{Multiplicative Update For Fast Optimization Of Information Retrieval Based Neighbor Embedding}
+\title{Multiplicative Update For Fast Optimization of Information Retrieval Based Neighbor Embedding}
 \author{Jaakko Peltonen, Ziyuan Lin}\date{\today}
 \institute[ICS]{Department of Information and Computer Science\\
-Aalto University, School of Science and Technology}
+Aalto University}
 
 \DeclareMathOperator*{\argmin}{arg\,min\,}
 \DeclareMathOperator*{\argmax}{arg\,max\,}
@@ -35,18 +35,38 @@ Aalto University, School of Science and Technology}
 \tableofcontents
 \end{frame}
 
-\section{Summary}
 \begin{frame}{Summary}
 \begin{enumerate}
-\item \emph{Neighbor Retrieval Visualizer} (NeRV) directly optimizes information retrieval measures which makes it outperform other NLDR methods;
-\item We propose a multiplicative update rule for the NeRV;
-\item It's fast and preserving good visual quality.
+\item \emph{Neighbor Retrieval Visualizer} (NeRV) is the first non-linear dimensional reduction method that formulates dimensional reduction as an information retrieval task. It directly optimizes information retrieval measures which makes it outperform other non-linear dimension reduction methods;
+\item We propose a multiplicative update rule for the NeRV which makes it faster and preserve the good quality as the original NeRV method;
 \end{enumerate}
 \end{frame}
 
 \section{Neighbor retrieval visualizer}
-\begin{frame}{Neighbor retrieval visualizer (NeRV)}
-NeRV minimizes two categories of errors: \emph{false neighbors} and \emph{misses}, and establishes connections between the errors and KL-divergences (\cite{venna10jmlr})
+
+\begin{frame}{An Example of NeRV}
+\begin{figure}
+\captionsetup[subfigure]{labelformat=empty}
+\centering
+\begin{tabular}{ccc}
+\subfloat[A 3D sphere]{\includegraphics[width=0.3\textwidth]{figures/glyphsphere1c.eps}} & 
+\subfloat["Tearing-open"]{\includegraphics[width=0.3\textwidth]{figures/glyphsphere-2d-l0.pdf}} &
+\subfloat["Squashing"]{\includegraphics[width=0.3\textwidth]{figures/glyphsphere-2d-l1.pdf}} 
+\end{tabular}
+\caption{Two ways showing 2D visualizations of a sphere: \textbf{A}) to tear it open, which emphasizes precision; or \textbf{B}) to squash it flat, which emphasizes recall.}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Errors in visual information retrieval}
+\begin{figure}
+\centering
+\includegraphics[width=\textwidth]{figures/retrieval_illustration.pdf}
+\caption{\footnotesize{\emph{Misses} are true neighbors that are not neighbors on the display; \emph{false neighbors} are neighbors on the display that are not true neighbors.}}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Technical detail of NeRV}
+The resulting total cost of errors turns out to be KL-divergences between neighborhood distributions (\cite{venna10jmlr}):
 \begin{align*}
 \{y^*_{ij}\}=&\argmin_{\{y_{ij}\}}\sum_i\sum_{j\ne i}\lambda p_{ij}\log\frac{p_{ij}}{q_{ij}}+(1-\lambda)q_{ij}\log\frac{q_{ij}}{p_{ij}}\\
 \triangleq &\argmin_{\{y_{ij}\}}\sum_i\lambda KL(P_i\|Q_i)+(1-\lambda)KL(Q_i\|P_i)
@@ -58,38 +78,16 @@ q_{ij} = \frac{\exp(-\|y_i-y_j\|^2/(2\sigma^2_i))}{\sum_{k\ne i} \exp(-\|y_i-y_k
 \]
 
 \[
-KL(P_i\|Q_i)\propto \mbox{ misses},\;KL(Q_i\|P_i)\propto \mbox{ false neighbors}
+KL(P_i\|Q_i)\propto \mbox{ \#misses},\;KL(Q_i\|P_i)\propto \mbox{ \#false neighbors}
 \]
 
 \end{frame}
 
 
-\begin{frame}{Errors in visual information retrieval}
-\begin{figure}
-\centering
-\includegraphics[width=\textwidth]{figures/retrieval_illustration.pdf}
-\caption{\footnotesize{Misses are true neighbors that are not neighbors on the display; false neighbors are neighbors on the display that are not true neighbors.}}
-\end{figure}
-\end{frame}
-
-
-\begin{frame}{Illustration of NeRV}
-\begin{figure}
-\begin{columns}
-\begin{column}{0.65\textwidth}
-\includegraphics[width=\textwidth]{figures/demo.png}
-\end{column}
-\begin{column}{0.3\textwidth}
-\caption{\scriptsize{Results of NeRV for a toy data set. \textbf{A} minimizes false neighbors (or emphasizes \emph{precision}) while \textbf{B} minimizes misses (or emphasizes \emph{recall}). Top right shows the mean precision-mean recall curves as a function of the output neighborhood size $k$.}}
-\end{column}
-\end{columns}
-\end{figure}
-\end{frame}
-
 \section{How to make it fast}
 \begin{frame}{NeRV is slow}
 
-NeRV is based on the traditional gradient descent method, which uses the additive update rule that needs a line search for the learning parameter $\alpha$:
+NeRV is based on the traditional gradient descent method, which uses the additive update rule that needs a line search for the step size $\alpha$:
 \[
 z^{(t+1)}_{id}=z^{(t)}_{id}-\alpha_{id} \nabla_{id} \mathcal{J}(z^{(t)})\;,
 \]
@@ -103,13 +101,13 @@ z^{(t)}_{id}:&\mbox{ the $(i,d)$-th parameter at the $t$-th iteration;}\\
 
 \begin{frame}{NeRV is slow}
 \begin{itemize}
-\item Because of the line search, it is too slow particularly when involving user interaction (\cite{peltonen13eurovis});
-\item Quad-tree based accelerations are considered, but they have to assume the neighborhood distribution $p_{ij}$ to be sparse (\cite{yang13icml} or \cite{vandermaaten13iclr}).
+\item This additive rule is widely used, but it is slow in cases that need fast response. For example the user interaction application (\cite{peltonen13eurovis}) of NeRV that we have explored recently;
+\item The Quad-tree based accelerations (\cite{yang13icml} or \cite{vandermaaten13iclr}) are comparable methods, but they have to assume the neighborhood distribution to be sparse, while what we present here has no such requirements.
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Our method}
-To exempt the tuning or line search in the additive update, we derive the \emph{multiplicative} update rule which is similar to (\cite{yang10mlsp}):
+To avoid the tuning or line search in the additive update, we derive the \emph{multiplicative} update rule as below. The work in (\cite{yang10mlsp}) is a special case for t-SNE.
 \[
 z^{(t+1)}_{id}=z^{(t)}_{id}\frac{\nabla^-_{id} \mathcal{J}(z^{(t)})}{\nabla^+_{id} \mathcal{J}(z^{(t)})}\;,
 \]
@@ -145,12 +143,12 @@ z^{(t+1)}_{id} =& z^{(t)}_{id}-\alpha_{id} \nabla_{id} \mathcal{J}(z^{(t)})\\
 
 \begin{frame}{The pipeline of multiplicative NeRV}
 \begin{enumerate}
-\item Re-parameterization with $z_{id}^{(0)}=\exp(y_{id}^{(0)})$ where $y_{id}$ are the coordinates in the display, because multiplicative update preserves the sign of the parameters;
+\item The multiplicative update rule is sign preserving. So we transform the coordinates with $z_{id}^{(0)}=\exp(y_{id}^{(0)})$;
 \item Update multiplicatively
 \[
 z^{(t+1)}_{id}=z^{(t)}_{id}\frac{\nabla^-_{id} \mathcal{J}(z^{(t)})}{\nabla^+_{id} \mathcal{J}(z^{(t)})}
 \]
-for 300 iterations empirically;
+for a sufficient number of iterations. In our experiments, 300 iterations works empirically well;
 \item Transform back to the display space:
 \[
 y_{id}^* =\log z^{*}_{id}
@@ -160,17 +158,23 @@ y_{id}^* =\log z^{*}_{id}
 
 \begin{frame}{Information retrieval perspective interpretation}
 \begin{itemize}
-\item Summary: the multiplicative update roughly pushes $y_{id}$ away from the worst false neighbors of $i$ and towards missed neighbors.
-\item As a very brief explanation, the final update involves terms like $(q_{j|i}D_{KL}(q_i,p_i)-q_{j|i}\log\frac{q_{j|i}}{p_{j|i}})$ and $(p_{j|i}-q_{j|i})$, from which we can see
-\begin{enumerate}
-\item $q_{j|i}D_{KL}(q_i,p_i)>q_{j|i}\log\frac{q_{j|i}}{p_{j|i}}$ means for query point $i$, neighbor $j$ contributed greater to the total false neighbor cost.
-\item $p_{j|i}>q_{j|i}$ means neighbor $j$ is missed for point $i$.
-\end{enumerate}
+\item The  multiplicative rule is that it is intuitive understandable, because terms in update rule have information retrieval interpretation;
+\item It pushes the coordinates $y_{id}$ away from the worst false neighbors of $i$ and towards missed neighbors;
 \item More details are available in the paper.
 \end{itemize}
 \end{frame}
 
 \section{Experiments}
+\begin{frame}{Experiments}
+Our experiments show three things: 
+\begin{enumerate}
+\item Our update rule produces visually similar results as the original NeRV;
+\item It improves much faster;
+\item In quantitative comparison, it outperforms many earlier methods.
+\end{enumerate}
+\end{frame}
+
+
 \begin{frame}{Experiments: results on Plain S-curve}
 \begin{figure}[!htb]
 \captionsetup[subfigure]{labelformat=empty}
@@ -205,7 +209,7 @@ y_{id}^* =\log z^{*}_{id}
 \subfloat[Multiplicative]{\includegraphics[height=0.5\textheight]{figures/lvqdata-nerv-0_1.pdf}} &
 \subfloat[Additive]{\includegraphics[height=0.5\textheight]{figures/lvqdata-original-nerv-0_1.pdf}}
 \end{tabular}
-\caption{A data set of phonemes (a basic unit of a language's phonology). Colors correspond to different phonemes.}
+\caption{A data set of phonemes (very short audio samples for speech). Colors correspond to different phonemes.}
 \end{figure}
 \end{frame}
 
@@ -296,7 +300,7 @@ y_{id}^* =\log z^{*}_{id}
 \subfloat[Plain S-curve]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-s-data-0.pdf}} &
 \subfloat[Noisy S-curve]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-s-data-06.pdf}} 
 \end{tabular}
-\caption{Mean smoothed recall vs. mean smoothed precision for different methods. Best methods locate top-right.}
+\caption{Mean smoothed recall vs. mean smoothed precision for different methods. Best methods are located top-right.}
 \end{figure}
 \end{frame}
 
@@ -309,7 +313,7 @@ y_{id}^* =\log z^{*}_{id}
 \subfloat[Olivetti Faces]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-olivettifaces.pdf}} &
 \subfloat[Mouse Gene Expression]{\includegraphics[width=0.5\textwidth]{figures/smoothed-precision-recall-hiiri.pdf}} 
 \end{tabular}
-\caption{Mean smoothed recall vs. mean smoothed precision for different methods. Best methods locate top-right. Mouse Gene Expression data set: gene expression profiles from different mouse tissues.}
+\caption{Mean smoothed recall vs. mean smoothed precision for different methods. Best methods are located top-right. Mouse Gene Expression data set: gene expression profiles from different mouse tissues.}
 \end{figure}
 \end{frame}
 
@@ -329,9 +333,9 @@ y_{id}^* =\log z^{*}_{id}
 
 \begin{frame}{Conclusion}
 \begin{enumerate}
+\item NeRV is a method that is already known to perform very well in experiments of comparison with other methods. In this paper we address the speed of learning;
 \item We introduced a multiplicative update rule for the information retrieval based visualization method Neighbor Retrieval Visualizer (NeRV);
-\item It needs no user-assigned learning rate parameter or line search;
-\item It yields strong speedup over original NeRV and maintains state of the art performance, in terms of qualitative appearance of visualizations and quantitative information retrieval performance measures.
+\item It needs no user-assigned learning rate parameter or line search, but yields strong speedup over original NeRV and maintains state of the art performance, in terms of qualitative appearance of visualizations and quantitative information retrieval performance measures.
 \end{enumerate}
 \end{frame}
 \end{document}
